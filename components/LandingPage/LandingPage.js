@@ -48,10 +48,12 @@ export default function LandingPage() {
     const realm = await Realm.open({schema: [Entity]});
     let entity;
     realm.write(()=>{
-      entity = realm.create("Entity", {_id: data, name: "test" });
+      
+      entity = realm.create("Entity", {_id: data, name: "test" }, "modified");
     })
     console.log("New Realm object:", data);
-    console.log("Database:", realm.objects("Entity").map(o=>o._id));
+    console.log("Database:", realm.objects("Entity").map((e)=>e._id));
+    realm.close()
   }
 
   return (

@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Button, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 import uuid from 'react-uuid';
 import EntityList from './EntityList/EntityList';
 import QRCode from 'qrcode'
 import * as Print from 'expo-print';
 import Realm from "realm";
 
-import BarcodeScanner from '../BarcodeScanner/BarcodeScanner';
 import { Entity } from '../../db/Schemes';
+import { GlobalStyle } from '../GlobalStyle';
+import { get } from 'lodash';
+import QRGeneratorModal from './QRGeneratorModal/QRGeneratorModal';
 
 
 const start = `<html>
@@ -20,54 +22,38 @@ const end = `</body>
 </html>`
 
 
-export default function LandingPage() {
-  const [size, setSize] = useState("4");
-  const [sizeInput, setSizeInput] = useState("4");
-  const [amount, SetAmount] = useState("10")
-
-  const generatePDF = () => {
-    let proms = Array.from(Array(parseInt(amount))).map(e=>QRCode.toString(uuid()))
-    Promise.all(proms).then(res=>{
-      let svgs = res.map(svg=>`<svg width="${size}cm"${svg.slice(4)}`).join("");
-      let html = `${start}${svgs}${end}`
-      console.log(html)
-      Print.printAsync({html})
-    })
-  }
-
-  const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+export default function LandingPage({route, navigation}) {
+  const [printModalOpen, setPrintModalOpen] = useState(false);
+  const { hasResult, result } = route.params || {};
 
   useEffect(()=>{
-    if (sizeInput) {
-      let newSize = clamp(parseFloat(sizeInput), 0, 27.9);
-      setSize(newSize.toString())
+    if (hasResult) {
+      addToDatabase(result)
+      navigation.setParams({hasResult: false})
     }
-  }, [sizeInput])
+  }, [result])
 
-  const onResult = async (data) => {
+  const addToDatabase = async (data) => {
     const realm = await Realm.open({schema: [Entity]});
-    let entity;
-    realm.write(()=>{
-      
-      entity = realm.create("Entity", {_id: data, name: "test" }, "modified");
-    })
-    console.log("New Realm object:", data);
+    let entries = Array.isArray(data) ? data : [data]
+    for (let entry of entries) {
+      realm.write(()=>{
+        realm.create("Entity", {_id: entry, name: "test" }, "modified");
+      })
+    }
     console.log("Database:", realm.objects("Entity").map((e)=>e._id));
     realm.close()
   }
 
   return (
-      <>
-        <Text>Größe in cm:</Text>
-        <TextInput keyboardType="numeric" style={styles.input} onChangeText={setSizeInput} value={sizeInput} />
-        <Text>Anzahl:</Text>
-        <TextInput keyboardType="numeric" style={styles.input} onChangeText={SetAmount} value={amount} />
+      <View style={GlobalStyle.viewContainer}>
         <EntityList />
         <View style={styles.fixedBottomButton}>
-          <Button onPress={generatePDF} title="PDF drucken" />
-          <BarcodeScanner onResult={onResult}  />
+          <Button onPress={()=>{setPrintModalOpen(true)}} title="Neue QR-Codes erstellen" />
+          <Button title="Barcode scannen" onPress={() => navigation.navigate("ScanPage")} />
         </View>
-      </>
+        <QRGeneratorModal modalVisible={printModalOpen} setModalVisible={setPrintModalOpen} />
+      </View>
   );
 }
 
@@ -77,11 +63,5 @@ const styles = StyleSheet.create({
     left: 12,
     bottom: 12,
     width: "100%"
-  },
-  input: {
-    width: "100%",
-    height: 40,
-    borderWidth: 1,
-    padding: 10,
   },
 })

@@ -1,13 +1,19 @@
 import { get } from "lodash";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
+import { Entity, useQuery } from "../../../db/Schemes";
 
-export default function EntityList({qrCodes=[]}) {
-    let mapped = qrCodes.map((e, i)=>{return {index: i, value: e}})
-    return (
-        <FlatList data={mapped} renderItem={EntityListItem} keyExtractor={e=>get(e, "value")} />
-    );
-  }
+export default function EntityList() {
+  const query = useQuery(Entity);
+
+  return (
+    <FlatList
+      data={query.values}
+      renderItem={EntityListItem}
+      keyExtractor={(e) => e._id}
+    />
+  );
+}
 
 function EntityListItem({item}) {
     return (

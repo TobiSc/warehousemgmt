@@ -1,49 +1,52 @@
-import { Button, Text, TextInput, View } from "react-native";
+import { Button, ScrollView, Text, View } from "react-native";
 import { GlobalStyle } from "../GlobalStyle";
-import { useObject, useRealm } from "../../db/Schemes";
+import { useObject, useQuery, useRealm } from "../../db/Schemes";
 import EntityList from "../LandingPage/EntityList/EntityList";
+import EntityEditor from "./EntityEditor/EntityEditor";
+import { useState } from "react";
 
 export default function EntityDetails({ route, navigation }) {
-	const { _id } = route.params || {};
+	const { id } = route.params || {};
 	const realm = useRealm();
-	const entity = useObject("Entity", _id);
+	const entity = useQuery("Entity").find((e) => e.id === id);
+	const [inputProps, setInputProps] = useState({ name: entity.name, tags: entity.tags, description: entity.description });
 
 	const addChildren = () => {
 		navigation.navigate("ScanPage", { onResult });
 	};
 
-	const onResult = (_id) => {
-		const child = realm.objectForPrimaryKey("Entity", _id);
+	const onResult = (id) => {
+		console.log("resultId:", id);
+		let child = realm.objects("Entity").find((e) => e.id === id);
 		let parent = entity;
 		let isRecursion = false;
 		while (parent) {
-			if (parent._id.toString() === child._id.toString()) {
+			if (parent.id === child.id) {
 				isRecursion = true;
 				break;
 			}
 			parent = parent.parent;
 		}
 		if (isRecursion) return;
+		console.log(`Adding ${child.id} as child to ${entity.id}`);
 		realm.write(() => {
 			child.parent = entity;
 		});
 	};
 
-	const setEntityProp = async (prop, value) => {
-		console.log(value);
+	const setEntityProp = (prop, value) => {
+		setInputProps({ ...inputProps, [prop]: value });
 		realm.write(() => {
 			entity[prop] = value;
-			console.log(entity.name);
 		});
 	};
 
 	return (
-		<View style={GlobalStyle.viewContainer}>
-			<Text>Name</Text>
-			<TextInput style={GlobalStyle.input} onChangeText={(v) => setEntityProp("name", v)} value={entity.name} />
+		<ScrollView style={GlobalStyle.viewContainer}>
+			<EntityEditor entity={inputProps} setProp={setEntityProp} />
 			<Text>Untergeordnet</Text>
-			<EntityList parent={_id} />
+			<EntityList parentId={id} />
 			<Button onPress={addChildren} title="Kindknoten hinzufügen" />
-		</View>
+		</ScrollView>
 	);
 }

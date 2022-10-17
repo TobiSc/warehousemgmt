@@ -1,10 +1,10 @@
 import { get } from "lodash";
 import { useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
-import { Entity, useQuery } from "../../../db/Schemes";
+import { useQuery } from "../../../db/Schemes";
 
-export default function EntityList({ parent = "nil", onEntityPressed = () => {}, depth = 0 }) {
-	const query = useQuery(Entity).filtered(parent !== "nil" ? `parent._id == oid(${parent})` : "parent == nil");
+export default function EntityList({ parentId = "nil", onEntityPressed = () => {}, depth = 0 }) {
+	const query = useQuery("Entity").filtered(parentId !== "nil" ? `parent.id = '${parentId}'` : "parent = nil");
 
 	if (query.isEmpty()) {
 		return <></>;
@@ -23,10 +23,10 @@ export default function EntityList({ parent = "nil", onEntityPressed = () => {},
 							marginTop: 12,
 						}}
 					>
-						<Pressable onPress={() => onEntityPressed(entity._id)}>
+						<Pressable onPress={() => onEntityPressed(entity.id)}>
 							<Text>{`${index + 1}. ${entity.name}`}</Text>
 						</Pressable>
-						<EntityList parent={entity._id} onEntityPressed={onEntityPressed} depth={depth + 1} />
+						<EntityList parentId={entity.id} onEntityPressed={onEntityPressed} depth={depth + 1} />
 					</View>
 				);
 			})}

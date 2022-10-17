@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LandingPage from "./components/LandingPage/LandingPage";
 import ScanPage from "./components/ScanPage/ScanPage";
-import NewEntity from "./components/NewEntity/NewEntity";
+import NewEntity from "./components/Entity/NewEntity";
 import { RealmContext } from "./db/Schemes";
 import EntityDetails from "./components/Entity/EntityDetails";
 
@@ -19,7 +19,7 @@ export default function App() {
 					<Stack.Screen name="LandingPage" component={LandingPage} options={{ title: "Startseite" }} />
 					<Stack.Screen name="ScanPage" component={ScanPage} />
 					<Stack.Screen name="NewEntity" component={NewEntity} options={{ title: "Neue Entität" }} />
-					<Stack.Screen name="Entity" component={EntityDetails} options={{ title: "Entität" }} />
+					<Stack.Screen name="EntityDetails" component={EntityDetails} options={{ title: "Entität" }} />
 				</Stack.Navigator>
 			</NavigationContainer>
 		</RealmProvider>

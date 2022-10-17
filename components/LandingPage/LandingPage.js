@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, StyleSheet, View } from "react-native";
+import { Button, ScrollView, StyleSheet, View } from "react-native";
 import EntityList from "./EntityList/EntityList";
 
 import { useRealm } from "../../db/Schemes";
@@ -18,37 +18,18 @@ const end = `</body>
 
 export default function LandingPage({ route, navigation }) {
 	const [printModalOpen, setPrintModalOpen] = useState(false);
-	const { hasResult, result } = route.params || {};
-	const realm = useRealm();
 
-	useEffect(() => {
-		if (hasResult) {
-			addToDatabase(result);
-			navigation.setParams({ hasResult: false });
-		}
-	}, [result]);
-
-	const addToDatabase = (data) => {
-		let entries = Array.isArray(data) ? data : [data];
-		for (let entry of entries) {
-			realm.write(() => {
-				realm.create("Entity", { _id: entry, name: "test" }, "modified");
-			});
-		}
-		console.log(
-			"Database:",
-			realm.objects("Entity").map((e) => e._id),
-		);
-	};
-
-	const openEntity = (_id) => {
-		console.log("Entity pressed:", _id);
-		navigation.navigate("Entity", { _id });
+	const openEntity = (id) => {
+		navigation.navigate("EntityDetails", { id });
 	};
 
 	return (
-		<View style={GlobalStyle.viewContainer}>
+		<ScrollView style={GlobalStyle.viewContainer}>
 			<EntityList onEntityPressed={openEntity} />
+			<View style={{ opacity: 0 }}>
+				<Button title="Neue QR-Codes erstellen" />
+				<Button title="Barcode scannen" />
+			</View>
 			<View style={styles.fixedBottomButton}>
 				<Button
 					onPress={() => {
@@ -56,10 +37,10 @@ export default function LandingPage({ route, navigation }) {
 					}}
 					title="Neue QR-Codes erstellen"
 				/>
-				<Button title="Barcode scannen" onPress={() => navigation.navigate("ScanPage")} />
+				<Button title="Barcode scannen" onPress={() => navigation.navigate("ScanPage", { onResult: () => {} })} />
 			</View>
 			<QRGeneratorModal modalVisible={printModalOpen} setModalVisible={setPrintModalOpen} />
-		</View>
+		</ScrollView>
 	);
 }
 

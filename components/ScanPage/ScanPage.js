@@ -1,19 +1,15 @@
-import { get } from "lodash";
 import { useEffect, useState } from "react";
-import { Button, FlatList, Modal, StyleSheet, Text, View } from "react-native";
+import { View } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { GlobalStyle } from "../GlobalStyle";
-import { useIsFocused } from "@react-navigation/native";
-import { Entity, useQuery, useRealm } from "../../db/Schemes";
+import { useObject, useQuery, useRealm } from "../../db/Schemes";
 
 export default function ScanPage({ route, navigation }) {
 	const { onResult } = route.params || {};
+	if (!onResult) navigation.goBack();
 	const [hasPermission, setHasPermission] = useState(false);
 	const [key, setKey] = useState(0);
-	const isFocused = useIsFocused();
-	const [entityIds, setEntityIds] = useState([]);
 	const realm = useRealm();
-	const query = useQuery("Entity");
 
 	useEffect(() => {
 		const requestPermissions = async () => {
@@ -30,22 +26,18 @@ export default function ScanPage({ route, navigation }) {
 	}, []);
 
 	const onScanned = ({ type, data }) => {
-		const isNew = query.filtered(`id == "${data}"`).isEmpty();
-		console.log("exists:", !isNew);
-		console.log("entities scanned: ", [...new Set([...entityIds, data])]);
-		setEntityIds([...new Set([...entityIds, data])]);
+		const entity = realm.objects("Entity").find((e) => e.id === data);
 		setKey(key + 1);
-		if (isNew) {
+		if (entity) {
+			onResult(entity.id);
+		} else {
 			navigation.navigate("NewEntity", { id: data, onCreated: onResult });
-		} else if (onResult) {
-			const result = query.filtered(`id == "${data}"`)[0];
-			onResult(result._id);
 		}
 	};
 
 	return (
 		<View style={GlobalStyle.viewContainer}>
-			{hasPermission && isFocused && (
+			{hasPermission && (
 				<BarCodeScanner
 					key={key}
 					style={{ height: "100%", width: "100%" }}

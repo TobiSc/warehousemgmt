@@ -7,7 +7,7 @@ import { Entity, useObject, useQuery, useRealm } from "../../db/Schemes";
 import { Realm } from "@realm/react";
 
 export default function NewEntity({ route, navigation }) {
-	const { id } = route.params || {};
+	const { id, onCreated } = route.params || {};
 	const realm = useRealm();
 	let realmObject = {};
 
@@ -15,6 +15,9 @@ export default function NewEntity({ route, navigation }) {
 		realm.write(() => {
 			realmObject = realm.create("Entity", Entity.generate(id, ""));
 		});
+		if (onCreated) {
+			onCreated(realmObject._id);
+		}
 	}, []);
 
 	const setEntityProp = async (prop, value) => {

@@ -7,6 +7,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { Entity, useQuery, useRealm } from "../../db/Schemes";
 
 export default function ScanPage({ route, navigation }) {
+	const { onResult } = route.params || {};
 	const [hasPermission, setHasPermission] = useState(false);
 	const [key, setKey] = useState(0);
 	const isFocused = useIsFocused();
@@ -35,7 +36,10 @@ export default function ScanPage({ route, navigation }) {
 		setEntityIds([...new Set([...entityIds, data])]);
 		setKey(key + 1);
 		if (isNew) {
-			navigation.navigate("NewEntity", { id: data });
+			navigation.navigate("NewEntity", { id: data, onCreated: onResult });
+		} else if (onResult) {
+			const result = query.filtered(`id == "${data}"`)[0];
+			onResult(result._id);
 		}
 	};
 

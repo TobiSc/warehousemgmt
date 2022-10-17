@@ -5,13 +5,15 @@ export class Entity {
 	id;
 	name;
 	createdAt;
+	parent;
 
-	static generate(id, name = "") {
+	static generate(id, name = "", parent) {
 		return {
 			_id: new Realm.BSON.ObjectId(),
 			id,
 			name,
 			createdAt: new Date(),
+			parent,
 		};
 	}
 
@@ -23,6 +25,7 @@ export class Entity {
 			id: "string",
 			name: "string",
 			createdAt: "date",
+			parent: "Entity?",
 		},
 	};
 }

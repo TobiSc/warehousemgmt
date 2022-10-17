@@ -1,38 +1,32 @@
 import { useEffect, useState } from "react";
 import { Button, FlatList, Modal, StyleSheet, Text, TextInput, View } from "react-native";
-import { BarCodeScanner } from 'expo-barcode-scanner';
+import { BarCodeScanner } from "expo-barcode-scanner";
 import { GlobalStyle } from "../GlobalStyle";
 import { get } from "lodash";
-import { Entity, useRealm } from "../../db/Schemes";
+import { Entity, useObject, useQuery, useRealm } from "../../db/Schemes";
+import { Realm } from "@realm/react";
 
 export default function NewEntity({ route, navigation }) {
-  const { _id } = route.params || {};
-  const [entity, SetEntity] = useState({ _id, name: "" });
-  const realm = useRealm();
+	const { id } = route.params || {};
+	const realm = useRealm();
+	let realmObject = {};
 
-  useEffect(() => {
-    realm.write(() => {
-      realm.create(
-        "Entity",
-        Entity.generate(entity._id, entity.name),
-        "modified"
-      );
-    });
-  }, [entity]);
+	useEffect(() => {
+		realm.write(() => {
+			realmObject = realm.create("Entity", Entity.generate(id, ""));
+		});
+	}, []);
 
-  const setEntityProp = async (prop, value) => {
-    let newEntity = { ...entity, [prop]: value };
-    SetEntity(newEntity);
-  };
+	const setEntityProp = async (prop, value) => {
+		realm.write(() => {
+			realmObject[prop] = value;
+		});
+	};
 
-  return (
-    <View style={GlobalStyle.viewContainer}>
-      <Text>Name</Text>
-      <TextInput
-        style={GlobalStyle.input}
-        onChangeText={(v) => setEntityProp("name", v)}
-        value={entity.name}
-      />
-    </View>
-  );
+	return (
+		<View style={GlobalStyle.viewContainer}>
+			<Text>Name</Text>
+			<TextInput style={GlobalStyle.input} onChangeText={(v) => setEntityProp("name", v)} value={realmObject.name} />
+		</View>
+	);
 }

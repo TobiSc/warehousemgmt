@@ -1,32 +1,34 @@
-import { createRealmContext } from "@realm/react";
+import { createRealmContext, Realm } from "@realm/react";
 
 export class Entity {
-  _id;
-  description;
-  isComplete;
-  createdAt;
+	_id;
+	id;
+	name;
+	createdAt;
 
-  static generate(_id, name = "") {
-    return {
-      _id,
-      name,
-      createdAt: new Date(),
-    };
-  }
+	static generate(id, name = "") {
+		return {
+			_id: new Realm.BSON.ObjectId(),
+			id,
+			name,
+			createdAt: new Date(),
+		};
+	}
 
-  static schema = {
-    name: "Entity",
-    primaryKey: "_id",
-    properties: {
-      _id: "string",
-      name: "string",
-      createdAt: "date",
-    },
-  };
+	static schema = {
+		name: "Entity",
+		primaryKey: "_id",
+		properties: {
+			_id: "objectId",
+			id: "string",
+			name: "string",
+			createdAt: "date",
+		},
+	};
 }
 
 const config = {
-  schema: [Entity],
+	schema: [Entity],
 };
 
 export const RealmContext = createRealmContext(config);

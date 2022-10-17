@@ -6,6 +6,9 @@ export class Entity {
 	name;
 	createdAt;
 	parent;
+	tags;
+	description;
+	images;
 
 	static generate(id, name = "", parent) {
 		return {
@@ -26,6 +29,9 @@ export class Entity {
 			name: "string",
 			createdAt: "date",
 			parent: "Entity?",
+			tags: "string[]",
+			description: "string?",
+			images: "string?",
 		},
 	};
 }

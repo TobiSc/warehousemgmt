@@ -6,7 +6,7 @@ import { useObject, useQuery, useRealm } from "../../db/Schemes";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ScanPage({ route, navigation }) {
-	const { onResult } = route.params || {};
+	const { onResult, mode } = route.params || {};
 	if (!onResult) navigation.goBack();
 	const [hasPermission, setHasPermission] = useState(false);
 	const [key, setKey] = useState(0);
@@ -38,8 +38,15 @@ export default function ScanPage({ route, navigation }) {
 		setKey(key + 1);
 		if (entity) {
 			onResult(entity.id);
+			if (mode === ScanModes.Single) {
+				navigation.goBack();
+			}
 		} else {
-			navigation.navigate("NewEntity", { id: data, onCreated: onResult });
+			if (mode === ScanModes.Single) {
+				navigation.replace("NewEntity", { id: data, onCreated: onResult });
+			} else {
+				navigation.navigate("NewEntity", { id: data, onCreated: onResult });
+			}
 		}
 	};
 

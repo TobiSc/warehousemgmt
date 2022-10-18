@@ -4,16 +4,14 @@ import { useObject, useQuery, useRealm } from "../../db/Schemes";
 import EntityList from "../LandingPage/EntityList/EntityList";
 import EntityEditor from "./EntityEditor/EntityEditor";
 import { useState } from "react";
+import { SpeedDial } from "@rneui/themed";
 
 export default function EntityDetails({ route, navigation }) {
 	const { id } = route.params || {};
 	const realm = useRealm();
 	const entity = useQuery("Entity").find((e) => e.id === id);
 	const [inputProps, setInputProps] = useState({ name: entity.name, tags: entity.tags, description: entity.description });
-
-	const addChildren = () => {
-		navigation.navigate("ScanPage", { onResult });
-	};
+	const [speedDialOpen, setSpeedDialOpen] = useState(false);
 
 	const onResult = (id) => {
 		console.log("resultId:", id);
@@ -42,11 +40,37 @@ export default function EntityDetails({ route, navigation }) {
 	};
 
 	return (
-		<ScrollView style={GlobalStyle.viewContainer}>
-			<EntityEditor entity={inputProps} setProp={setEntityProp} />
-			<Text>Untergeordnet</Text>
-			<EntityList parentId={id} />
-			<Button onPress={addChildren} title="Kindknoten hinzufügen" />
-		</ScrollView>
+		<>
+			<ScrollView style={GlobalStyle.viewContainer}>
+				<EntityEditor entity={inputProps} setProp={setEntityProp} />
+				<Text>Untergeordnet</Text>
+				<EntityList parentId={id} />
+			</ScrollView>
+			<SpeedDial
+				isOpen={speedDialOpen}
+				icon={{ name: "qr-code-2", color: "#fff" }}
+				openIcon={{ name: "close", color: "#fff" }}
+				onOpen={() => setSpeedDialOpen(true)}
+				onClose={() => setSpeedDialOpen(false)}
+				labelPressable={true}
+			>
+				<SpeedDial.Action
+					icon={{ name: "library-add", color: "#fff" }}
+					title="Mehrere neue untergeordnete Entitäten"
+					onPress={() => {
+						navigation.navigate("ScanPage", { onResult, mode: ScanModes.Multiple });
+						setSpeedDialOpen(false);
+					}}
+				/>
+				<SpeedDial.Action
+					icon={{ name: "add-box", color: "#fff" }}
+					title="Neue untergeordnete Entität"
+					onPress={() => {
+						navigation.navigate("ScanPage", { onResult, mode: ScanModes.Single });
+						setSpeedDialOpen(false);
+					}}
+				/>
+			</SpeedDial>
+		</>
 	);
 }

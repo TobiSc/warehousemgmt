@@ -48,3 +48,8 @@ export default function ScanPage({ route, navigation }) {
 		</View>
 	);
 }
+
+export const ScanModes = {
+	Single: "single",
+	Multiple: "multiple",
+};

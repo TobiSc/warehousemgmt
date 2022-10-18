@@ -19,7 +19,7 @@ export default function EntityList({ parentId = "nil", onEntityPressed = () => {
 						style={{
 							...styles.list,
 							backgroundColor: colorPalette[depth % 6],
-							marginLeft: 12,
+							marginLeft: depth && 12, //Top Level should not add extra margin
 							marginTop: 12,
 						}}
 					>

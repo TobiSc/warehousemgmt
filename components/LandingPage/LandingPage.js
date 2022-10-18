@@ -1,54 +1,55 @@
 import { useEffect, useState } from "react";
-import { Button, ScrollView, StyleSheet, View } from "react-native";
+import { Button, Modal, ScrollView, StyleSheet, View } from "react-native";
 import EntityList from "./EntityList/EntityList";
 
-import { useRealm } from "../../db/Schemes";
 import { GlobalStyle } from "../GlobalStyle";
-import { get } from "lodash";
-import QRGeneratorModal from "./QRGeneratorModal/QRGeneratorModal";
-
-const start = `<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
-</head>
-<body style="text-align: center;">`;
-
-const end = `</body>
-</html>`;
+import { SpeedDial } from "@rneui/themed";
+import { ScanModes } from "../ScanPage/ScanPage";
 
 export default function LandingPage({ route, navigation }) {
-	const [printModalOpen, setPrintModalOpen] = useState(false);
-
+	const [speedDialOpen, setSpeedDialOpen] = useState(false);
 	const openEntity = (id) => {
 		navigation.navigate("EntityDetails", { id });
 	};
 
 	return (
-		<ScrollView style={GlobalStyle.viewContainer}>
-			<EntityList onEntityPressed={openEntity} />
-			<View style={{ opacity: 0 }}>
-				<Button title="Neue QR-Codes erstellen" />
-				<Button title="Barcode scannen" />
-			</View>
-			<View style={styles.fixedBottomButton}>
-				<Button
+		<>
+			<ScrollView style={GlobalStyle.viewContainer}>
+				<EntityList onEntityPressed={openEntity} />
+			</ScrollView>
+			<SpeedDial
+				isOpen={speedDialOpen}
+				icon={{ name: "qr-code-2", color: "#fff" }}
+				openIcon={{ name: "close", color: "#fff" }}
+				onOpen={() => setSpeedDialOpen(true)}
+				onClose={() => setSpeedDialOpen(false)}
+				labelPressable={true}
+			>
+				<SpeedDial.Action
+					icon={{ name: "print", color: "#fff" }}
+					title="Neue QR-Codes"
 					onPress={() => {
-						setPrintModalOpen(true);
+						navigation.navigate("QRGenerator");
+						setSpeedDialOpen(false);
 					}}
-					title="Neue QR-Codes erstellen"
 				/>
-				<Button title="Barcode scannen" onPress={() => navigation.navigate("ScanPage", { onResult: () => {} })} />
-			</View>
-			<QRGeneratorModal modalVisible={printModalOpen} setModalVisible={setPrintModalOpen} />
-		</ScrollView>
+				<SpeedDial.Action
+					icon={{ name: "library-add", color: "#fff" }}
+					title="Mehrere neue Entitäten"
+					onPress={() => {
+						navigation.navigate("ScanPage", { onResult: () => {}, mode: ScanModes.Multiple });
+						setSpeedDialOpen(false);
+					}}
+				/>
+				<SpeedDial.Action
+					icon={{ name: "add-box", color: "#fff" }}
+					title="Neue Entität"
+					onPress={() => {
+						navigation.navigate("ScanPage", { onResult: () => {}, mode: ScanModes.Single });
+						setSpeedDialOpen(false);
+					}}
+				/>
+			</SpeedDial>
+		</>
 	);
 }
-
-const styles = StyleSheet.create({
-	fixedBottomButton: {
-		position: "absolute",
-		left: 12,
-		bottom: 12,
-		width: "100%",
-	},
-});

@@ -6,6 +6,8 @@ import ScanPage from "./components/ScanPage/ScanPage";
 import NewEntity from "./components/Entity/NewEntity";
 import { RealmContext } from "./db/Schemes";
 import EntityDetails from "./components/Entity/EntityDetails";
+import QRGenerator from "./components/QRGenerator/QRGenerator";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const Stack = createNativeStackNavigator();
 
@@ -13,15 +15,18 @@ const { RealmProvider } = RealmContext;
 
 export default function App() {
 	return (
-		<RealmProvider>
-			<NavigationContainer>
-				<Stack.Navigator initialRouteName="LandingPage">
-					<Stack.Screen name="LandingPage" component={LandingPage} options={{ title: "Startseite" }} />
-					<Stack.Screen name="ScanPage" component={ScanPage} />
-					<Stack.Screen name="NewEntity" component={NewEntity} options={{ title: "Neue Entität" }} />
-					<Stack.Screen name="EntityDetails" component={EntityDetails} options={{ title: "Entität" }} />
-				</Stack.Navigator>
-			</NavigationContainer>
-		</RealmProvider>
+		<SafeAreaProvider>
+			<RealmProvider>
+				<NavigationContainer>
+					<Stack.Navigator initialRouteName="LandingPage">
+						<Stack.Screen name="LandingPage" component={LandingPage} options={{ title: "Startseite" }} />
+						<Stack.Screen name="ScanPage" component={ScanPage} />
+						<Stack.Screen name="NewEntity" component={NewEntity} options={{ title: "Neue Entität" }} />
+						<Stack.Screen name="EntityDetails" component={EntityDetails} options={{ title: "Entität" }} />
+						<Stack.Screen name="QRGenerator" component={QRGenerator} options={{ title: "Neue QR-Codes drucken" }} />
+					</Stack.Navigator>
+				</NavigationContainer>
+			</RealmProvider>
+		</SafeAreaProvider>
 	);
 }

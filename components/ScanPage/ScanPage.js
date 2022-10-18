@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { View } from "react-native";
+import { Vibration, View } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { GlobalStyle } from "../GlobalStyle";
 import { useObject, useQuery, useRealm } from "../../db/Schemes";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ScanPage({ route, navigation }) {
 	const { onResult } = route.params || {};
@@ -10,6 +11,7 @@ export default function ScanPage({ route, navigation }) {
 	const [hasPermission, setHasPermission] = useState(false);
 	const [key, setKey] = useState(0);
 	const realm = useRealm();
+	const [vibration, setVibration] = useState(true);
 
 	useEffect(() => {
 		const requestPermissions = async () => {
@@ -23,9 +25,15 @@ export default function ScanPage({ route, navigation }) {
 			}
 		};
 		requestPermissions();
+		AsyncStorage.getItem("settings", (e, s) => {
+			if (s) setVibration(JSON.parse(s).vibration);
+		});
 	}, []);
 
 	const onScanned = ({ type, data }) => {
+		if (vibration) {
+			Vibration.vibrate(50);
+		}
 		const entity = realm.objects("Entity").find((e) => e.id === data);
 		setKey(key + 1);
 		if (entity) {
